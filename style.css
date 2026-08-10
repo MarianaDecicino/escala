@@ -583,3 +583,26 @@ tr:hover > th { color: var(--accent, var(--teal)) !important; }
   background: rgba(45,107,228,.1) !important;
 }
 
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav { width: 0; min-width: 0; overflow: hidden; transition: width .3s; position: fixed; z-index: 200; height: 100vh; }
+  nav.mob-open { width: 230px; }
+  .main { margin-left: 0 !important; }
+  #mob-menu-btn { display: flex !important; }
+  .topbar { padding: 0 10px; }
+  .bc { font-size: .75rem; }
+  .page { padding: 14px 10px; }
+  .card { padding: 12px 10px; }
+  .ptitle { font-size: 1.3rem; }
+  .psub { font-size: .72rem; }
+  h2 { font-size: .95rem; }
+  .grid2, .grid3 { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr"], [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns:1fr 1fr 1fr"], [style*="grid-template-columns: 1fr 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  .tw { overflow-x: auto; }
+  table { min-width: 500px; }
+  .fca { flex-wrap: wrap; gap: 8px; }
+  .btn { font-size: .72rem; padding: 5px 10px; }
+  #login-box { width: 95vw !important; padding: 24px 16px !important; }
+}

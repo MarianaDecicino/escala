@@ -122,31 +122,28 @@
   <div class="snav">
     <div class="slabel">Principal</div>
     <div class="ni active" data-page="p1"><span class="ico">🏠</span><span class="lbl">Visão Geral</span></div>
-
-    <div class="slabel" style="margin-top:6px">Gestão</div>
     <div class="ni" data-page="p2"><span class="ico">📊</span><span class="lbl">Dashboard Executivo</span></div>
-    <div class="ni" data-page="p3"><span class="ico">📈</span><span class="lbl">Acompanhamento KPIs</span></div>
-    <div class="ni" data-page="ponepage"><span class="ico">📄</span><span class="lbl">One page Coops</span></div>
+    <div class="slabel" style="margin-top:6px">Gestão</div>
     <div class="ni" data-page="pgov"><span class="ico">🏛</span><span class="lbl">Governança</span></div>
+    <div class="ni" data-page="ponepage"><span class="ico">📄</span><span class="lbl">One page Coops</span></div>
+    <div class="ni" data-page="ppac"><span class="ico">🚀</span><span class="lbl">PAC</span></div>
+    <div class="ni" data-page="prelac"><span class="ico">🤝</span><span class="lbl">Relacionamento Coops</span></div>
+    <div class="ni" data-page="ptimeline"><span class="ico">📅</span><span class="lbl">Timeline</span></div>
+    <div class="slabel" style="margin-top:6px">Encontros</div>
     <div class="ni" data-page="p4"><span class="ico">📅</span><span class="lbl">Gestão de Encontros</span></div>
-    <div class="ni" data-page="ptimeline" style="padding-left:28px;font-size:.8rem"><span class="ico" style="font-size:.9rem">📅</span><span class="lbl">Timeline</span></div>
     <div class="ni" data-page="pmind" style="padding-left:28px;font-size:.8rem"><span class="ico" style="font-size:.9rem">🧠</span><span class="lbl">MINDCOOP</span></div>
     <div class="ni" data-page="pinfo" style="padding-left:28px;font-size:.8rem"><span class="ico" style="font-size:.9rem">📡</span><span class="lbl">INFOCOOP</span></div>
     <div class="ni" data-page="pinte" style="padding-left:28px;font-size:.8rem"><span class="ico" style="font-size:.9rem">🔬</span><span class="lbl">INTECOOP</span></div>
     <div class="ni" data-page="pelite" style="padding-left:28px;font-size:.8rem"><span class="ico" style="font-size:.9rem">⭐</span><span class="lbl">ELITECOOP</span></div>
     <div class="ni" data-page="pgo" style="padding-left:28px;font-size:.8rem"><span class="ico" style="font-size:.9rem">🚀</span><span class="lbl">GOCOOP</span></div>
+    <div class="slabel" style="margin-top:6px">Dados</div>
     <div class="ni" data-page="p5"><span class="ico">🌾</span><span class="lbl">Cooperativas</span></div>
-
-
-
-    <div class="slabel" style="margin-top:6px" id="nav-admin-section" style="display:none">Admin</div>
+    <div class="ni" data-page="ppinc"><span class="ico">⚙️</span><span class="lbl">PINC</span></div>
+    <div class="ni" data-page="p3"><span class="ico">📈</span><span class="lbl">Acompanhamento KPIs</span></div>
+    <div class="slabel" style="margin-top:6px">Admin</div>
     <div class="ni" data-page="padmin" id="nav-admin-item" style="display:none">
       <span class="ico">🔐</span><span class="lbl">Administração de Acessos</span>
-    </div>
-    <div class="slabel" style="margin-top:6px">Gestão</div>
-    <div class="ni" data-page="ppinc"><span class="ico">📌</span><span class="lbl">PINC</span></div>
-    <div class="slabel" style="margin-top:6px">Extras</div>
-  </div>
+    </div></div>
 </nav>
 
 <!-- HEADER -->
@@ -387,16 +384,55 @@
   </div>
 </div>
 
+<!-- ═══════════════ GOVERNANÇA ═══════════════ -->
+<div class="page" id="page-pgov">
+  <div class="ptitle">🏛 Governança</div>
+  <div class="psub">Rituais de gestão · Acompanhamento de cooperativas · Radar estratégico</div>
 
-<!-- ═══════════════ P3 · KPIs e RITUAIS ═══════════════ -->
-<div class="page" id="page-p3">
-  <div class="ptitle" contenteditable="true">Acompanhamento KPIs</div>
-  <div class="psub" contenteditable="true">Acompanhamento estruturado por área — Health Checks mensais e evolução por cooperativa</div>
+  <!-- Rituais de Gestão -->
+  <h2 class="mt22" contenteditable="true">Rituais de Gestão</h2>
+  <div class="card">
+    <div class="tw">
+      <table id="rituais-table">
+        <thead><tr>
+          <th style="min-width:260px">Descrição</th>
+          <th style="min-width:150px">Responsáveis</th>
+          <th style="min-width:150px">Participantes</th>
+          <th style="min-width:120px">Periodicidade</th>
+          <th style="width:36px"></th>
+        </tr></thead>
+        <tbody id="rituais-body"></tbody>
+      </table>
+    </div>
+    <button class="btn btn-g btn-sm mt12" id="add-ritual-btn">+ Ritual</button>
+  </div>
 
-  <div class="ptabs" id="kpi-area-tabs"></div>
-  <div id="kpi-area-content"></div>
+  <!-- Matriz de Acompanhamento dos Rituais -->
+  <h2 class="mt22" contenteditable="true">Acompanhamento dos Rituais</h2>
+  <div class="card" style="padding:0">
+    <div id="ritual-matrix-wrap"></div>
+  </div>
 
-  
+  <!-- Mapeamento de Temas -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:28px;margin-bottom:12px">
+    <h2 style="margin:0" contenteditable="true">Mapeamento de Temas</h2>
+    <button class="btn btn-p btn-sm" onclick="addTema()">+ Linha</button>
+  </div>
+  <div class="card" style="padding:0;overflow-x:auto">
+    <table style="width:max-content;min-width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:var(--navy-m)">
+          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:180px">Ritual</th>
+          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:120px">Data</th>
+          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:260px">Detalhe</th>
+          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:260px">Próximos Passos e Responsáveis</th>
+          <th style="padding:11px 14px;border-bottom:2px solid rgba(42,191,191,.25);width:36px"></th>
+        </tr>
+      </thead>
+      <tbody id="temas-body"></tbody>
+    </table>
+  </div>
+
 </div>
 
 <!-- ═══════════════ ONE PAGE COOPS ═══════════════ -->
@@ -412,6 +448,70 @@
   <div id="onepage-content"></div>
 </div>
 
+<!-- ═══════════════ PAC · PLANO DE ACELERAÇÃO DAS COOPERATIVAS ═══════════════ -->
+<div class="page" id="page-ppac">
+  <div class="ptitle">🚀 PAC — Plano de Aceleração das Cooperativas</div>
+  <div class="psub">Dados estratégicos, plano e ações por cooperativa</div>
+
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap">
+    <button class="btn btn-p" onclick="openPacModal()">+ Coop</button>
+    <div style="font-size:.78rem;color:var(--g400)" id="pac-count"></div>
+  </div>
+  <div id="pac-cards"></div>
+
+  <!-- Modal add coop -->
+  <div id="pac-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center">
+    <div style="background:var(--navy-d);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:28px;width:380px;max-width:95vw">
+      <div style="font-size:1rem;font-weight:800;color:var(--white);margin-bottom:16px">+ Adicionar Cooperativa ao PAC</div>
+      <div class="lf" style="margin-bottom:16px">
+        <div class="fl">Cooperativa</div>
+        <select id="pac-coop-sel" onchange="pacCoopPreview()" class="inp" style="background:var(--navy-m);border:1px solid rgba(255,255,255,.12);color:var(--white);border-radius:8px;padding:9px 13px;width:100%;font-size:.85rem">
+          <option value="">Selecione...</option>
+        </select>
+      </div>
+      <div id="pac-preview" style="display:none;background:rgba(42,191,191,.07);border:1px solid rgba(42,191,191,.18);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:.75rem">
+        <div id="pac-prev-kam" style="color:var(--teal);font-weight:700"></div>
+        <div id="pac-prev-rsl" style="color:var(--g400);margin-top:3px"></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-g" onclick="closePacModal()">Cancelar</button>
+        <button class="btn btn-p" onclick="addPacCoop()">Adicionar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ RELACIONAMENTO COOPS ═══════════════ -->
+<div class="page" id="page-prelac">
+  <div class="ptitle">🤝 Relacionamento Coops</div>
+  <div class="psub">Gestão de relacionamento com cooperativas · Acompanhamento e termômetro</div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="font-size:.8rem;color:var(--g400)" id="relac-count"></div>
+    <button class="btn btn-p btn-sm" onclick="addRelac()">+ Linha</button>
+  </div>
+
+  <div class="card" style="padding:0;overflow-x:auto">
+    <table style="width:max-content;min-width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:var(--navy-m)">
+          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:160px">Cooperativa</th>
+          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:160px">KAM</th>
+          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:140px">Diretoria</th>
+          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:200px">Ação</th>
+          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:110px">Data</th>
+          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:160px">Responsáveis</th>
+          <th style="padding:11px 14px;text-align:center;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:140px">Relacionamento Atual</th>
+          <th style="padding:11px 14px;border-bottom:2px solid rgba(42,191,191,.25);width:36px"></th>
+        </tr>
+      </thead>
+      <tbody id="relac-body"></tbody>
+    </table>
+  </div>
+</div>
+
+
+
 <!-- ═══════════════ P4 · GESTÃO DE ENCONTROS ═══════════════ -->
 <div class="page" id="page-p4">
   <div class="ptitle" contenteditable="true">Gestão de Encontros</div>
@@ -421,6 +521,36 @@
     <div id="enc-tabs" class="fca gap6" style="flex-wrap:wrap"></div>
   </div>
   <div id="enc-content"></div>
+</div>
+
+<!-- ═══════════════ PROGRAMAS (template reutilizável) ═══════════════ -->
+<div class="page" id="page-pmind"><div id="content-pmind"></div></div>
+<div class="page" id="page-pinfo"><div id="content-pinfo"></div></div>
+<div class="page" id="page-pinte"><div id="content-pinte"></div></div>
+<div class="page" id="page-pelite"><div id="content-pelite"></div></div>
+<div class="page" id="page-pgo"><div id="content-pgo"></div></div>
+
+<!-- FOTOS -->
+<div class="page" id="page-pfotos">
+  <div class="ptitle" contenteditable="true">Fotos e Evidências</div>
+  <div class="psub" contenteditable="true">Galeria centralizada de registros do Programa ESCALA</div>
+  <div class="card mb16">
+    <h3 contenteditable="true">Adicionar Registro</h3>
+    <div class="g2 mt8" style="gap:10px">
+      <input class="inp" id="photo-url" placeholder="URL da imagem ou cole base64">
+      <input class="inp" id="photo-caption" placeholder="Legenda / Descrição">
+      <input class="inp" id="photo-prog" placeholder="Programa (ex: MINDCOOP)">
+      <input class="inp" type="date" id="photo-date">
+    </div>
+    <button class="btn btn-p mt12" id="add-photo-btn">+ Adicionar</button>
+    <label class="btn btn-o mt12" style="cursor:pointer;margin-left:6px">📎 Upload <input type="file" accept="image/*" multiple id="photo-upload" style="display:none"></label>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px" id="photo-gallery"></div>
+
+
+
+
+
 </div>
 
 <!-- ═══════════════ P5 · COOPERATIVAS ═══════════════ -->
@@ -467,35 +597,6 @@
   </div>
 </div>
 
-<!-- ═══════════════ PROGRAMAS (template reutilizável) ═══════════════ -->
-<div class="page" id="page-pmind"><div id="content-pmind"></div></div>
-<div class="page" id="page-pinfo"><div id="content-pinfo"></div></div>
-<div class="page" id="page-pinte"><div id="content-pinte"></div></div>
-<div class="page" id="page-pelite"><div id="content-pelite"></div></div>
-<div class="page" id="page-pgo"><div id="content-pgo"></div></div>
-
-<!-- FOTOS -->
-<div class="page" id="page-pfotos">
-  <div class="ptitle" contenteditable="true">Fotos e Evidências</div>
-  <div class="psub" contenteditable="true">Galeria centralizada de registros do Programa ESCALA</div>
-  <div class="card mb16">
-    <h3 contenteditable="true">Adicionar Registro</h3>
-    <div class="g2 mt8" style="gap:10px">
-      <input class="inp" id="photo-url" placeholder="URL da imagem ou cole base64">
-      <input class="inp" id="photo-caption" placeholder="Legenda / Descrição">
-      <input class="inp" id="photo-prog" placeholder="Programa (ex: MINDCOOP)">
-      <input class="inp" type="date" id="photo-date">
-    </div>
-    <button class="btn btn-p mt12" id="add-photo-btn">+ Adicionar</button>
-    <label class="btn btn-o mt12" style="cursor:pointer;margin-left:6px">📎 Upload <input type="file" accept="image/*" multiple id="photo-upload" style="display:none"></label>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px" id="photo-gallery"></div>
-
-
-
-
-
-</div>
 <!-- ═══════════════ ADMIN DE ACESSOS ═══════════════ -->
 <div class="page" id="page-padmin">
   <div class="ptitle">🔐 Administração de Acessos</div>
@@ -606,57 +707,6 @@
 </div>
 </div>
 
-<!-- ═══════════════ GOVERNANÇA ═══════════════ -->
-<div class="page" id="page-pgov">
-  <div class="ptitle">🏛 Governança</div>
-  <div class="psub">Rituais de gestão · Acompanhamento de cooperativas · Radar estratégico</div>
-
-  <!-- Rituais de Gestão -->
-  <h2 class="mt22" contenteditable="true">Rituais de Gestão</h2>
-  <div class="card">
-    <div class="tw">
-      <table id="rituais-table">
-        <thead><tr>
-          <th style="min-width:260px">Descrição</th>
-          <th style="min-width:150px">Responsáveis</th>
-          <th style="min-width:150px">Participantes</th>
-          <th style="min-width:120px">Periodicidade</th>
-          <th style="width:36px"></th>
-        </tr></thead>
-        <tbody id="rituais-body"></tbody>
-      </table>
-    </div>
-    <button class="btn btn-g btn-sm mt12" id="add-ritual-btn">+ Ritual</button>
-  </div>
-
-  <!-- Matriz de Acompanhamento dos Rituais -->
-  <h2 class="mt22" contenteditable="true">Acompanhamento dos Rituais</h2>
-  <div class="card" style="padding:0">
-    <div id="ritual-matrix-wrap"></div>
-  </div>
-
-  <!-- Mapeamento de Temas -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:28px;margin-bottom:12px">
-    <h2 style="margin:0" contenteditable="true">Mapeamento de Temas</h2>
-    <button class="btn btn-p btn-sm" onclick="addTema()">+ Linha</button>
-  </div>
-  <div class="card" style="padding:0;overflow-x:auto">
-    <table style="width:max-content;min-width:100%;border-collapse:collapse">
-      <thead>
-        <tr style="background:var(--navy-m)">
-          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:180px">Ritual</th>
-          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:120px">Data</th>
-          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:260px">Detalhe</th>
-          <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid rgba(42,191,191,.25);min-width:260px">Próximos Passos e Responsáveis</th>
-          <th style="padding:11px 14px;border-bottom:2px solid rgba(42,191,191,.25);width:36px"></th>
-        </tr>
-      </thead>
-      <tbody id="temas-body"></tbody>
-    </table>
-  </div>
-
-</div>
-
 <!-- ═══════════════ PINC ═══════════════ -->
 <div class="page" id="page-ppinc">
   <div class="ptitle">⚙️ Calendário de Processos 2026</div>
@@ -670,45 +720,15 @@
   </div>
 </div>
 
-<!-- ═══════════════ TIMELINE ═══════════════ -->
-<div class="page" id="page-ptimeline">
-  <div class="ptitle">📅 Timeline</div>
-  <div class="psub">Marcos e eventos do programa · Atualização automática</div>
+<!-- ═══════════════ P3 · KPIs e RITUAIS ═══════════════ -->
+<div class="page" id="page-p3">
+  <div class="ptitle" contenteditable="true">Acompanhamento KPIs</div>
+  <div class="psub" contenteditable="true">Acompanhamento estruturado por área — Health Checks mensais e evolução por cooperativa</div>
 
-  <!-- Visual timeline (auto-renders from table) -->
-  <div id="timeline-visual" style="margin-bottom:28px"></div>
+  <div class="ptabs" id="kpi-area-tabs"></div>
+  <div id="kpi-area-content"></div>
 
-  <!-- Tabela de marcos -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-    <h2 style="margin:0">Marcos</h2>
-    <button class="btn btn-p btn-sm" id="add-marco-btn">+ Marco</button>
-  </div>
-  <div class="card" style="padding:0">
-    <div class="tw">
-      <table>
-        <thead><tr>
-          <th style="min-width:260px">Ação / Marco</th>
-          <th style="min-width:120px">Mês</th>
-          <th style="width:36px"></th>
-        </tr></thead>
-        <tbody id="marcos-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-
-</main>
-</div>
-
-<!-- MODAL COOP DETALHE -->
-<div class="modal-bg" id="coop-modal">
-  <div class="modal">
-    <div class="fca gap10 mb12">
-      <h2 id="modal-coop-title" style="margin:0"></h2>
-      <button class="btn btn-g btn-sm right" id="modal-close">✕ Fechar</button>
-    </div>
-    <div id="modal-coop-body"></div>
-  </div>
+  
 </div>
 
 <div id="toast">✓ Salvo</div>

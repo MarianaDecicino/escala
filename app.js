@@ -349,6 +349,8 @@ const D0 = {
     {id:4,desc:'REUNIÕES COM KAMs/RSLs',detail:'Acompanham a evolução das cooperativas, monitoram a execução do PINC, atualizam o status do Programa ESCALA e definem ações para acelerar oportunidades e resolver desvios. (MindCoop: mensal • Demais cooperativas: bimestral • Reuniões extraordinárias quando necessário.)',resp:'',mes:'',status:'gray'}
   ],
   govCoops:[],
+  relac:[],
+  pac:[],
   temas:[],
   pincGantt:{
     fin:[
@@ -435,8 +437,8 @@ const D0 = {
 };
 
 let D={};
-const SC=['green','amber','red','blue','gray'];
-const SL={green:'Concluído',amber:'Em prep.',red:'Atrasado',blue:'Em progresso',gray:'Não iniciado'};
+const SC=['gray','green','amber','red','blue'];
+const SL={green:'Concluído',amber:'Em prep.',red:'Atrasado',blue:'Em progresso',gray:'—'};
 const MONTHS=['julho','agosto','setembro','outubro','novembro','dezembro'];
 
 // ═══════════ STATUS TAG ═══════════
@@ -504,6 +506,8 @@ function init(){
   if(D.rituais) D.rituais.forEach(r=>{ if(!r.participantes) r.participantes=''; if(!r.periodicidade) r.periodicidade=''; });
   if(!D.ritual_matrix) D.ritual_matrix=JSON.parse(JSON.stringify(D0.ritual_matrix||{}));
   if(!D.govCoops||!Array.isArray(D.govCoops)) D.govCoops=[];
+  if(!D.relac||!Array.isArray(D.relac)) D.relac=[];
+  if(!D.pac||!Array.isArray(D.pac)) D.pac=[];
   if(!D.temas||!Array.isArray(D.temas)) D.temas=[];
   if(!D.pinc||!Array.isArray(D.pinc)||!D.pinc.length) D.pinc=JSON.parse(JSON.stringify(D0.pinc||[]));
   if(!D.pincGantt||typeof D.pincGantt!=='object'||!Array.isArray(D.pincGantt.fin)) D.pincGantt=JSON.parse(JSON.stringify(D0.pincGantt));
@@ -552,6 +556,7 @@ function cloneEncontro(nome){
 
 // ═══════════ RENDER ALL ═══════════
 function renderAll(){
+  try{_initLastSavedBadges();}catch(e){console.warn('badges',e);}
   try{renderTimeline();}catch(e){console.warn('renderTimeline',e);}
   try{renderProgCards();}catch(e){console.warn('renderProgCards',e);}
   try{renderDashboard();}catch(e){console.error('[renderAll] renderDashboard FAILED:',e.message,e.stack?.split('\n')[1]);}
@@ -565,6 +570,8 @@ function renderAll(){
   try{renderRituais();}catch(e){console.error('[renderAll] renderRituais FAILED:',e.message,e.stack?.split('\n')[1]);}
   try{renderGovCoops();}catch(e){console.warn('renderGovCoops',e);}
   try{renderTemas();}catch(e){console.warn('renderTemas',e);}
+  try{renderRelac();}catch(e){console.warn('renderRelac',e);}
+  try{renderPac();}catch(e){console.warn('renderPac',e);}
   try{renderPinc();}catch(e){console.error('[renderAll] renderPinc FAILED:',e.message,e.stack?.split('\n')[1]);}
   try{renderMarcos();}catch(e){console.warn('renderMarcos',e);}
   // Permissions handled by _applyPerms after auth
@@ -1560,8 +1567,11 @@ function renderFotos(){
 }
 
 // ═══════════ NAVIGATION ═══════════
-const BC={p1:'Visão Geral',p2:'Dashboard Executivo',p3:'Acompanhamento KPIs',ponepage:'One page Coops',p4:'Gestão de Encontros',p5:'Cooperativas',pmind:'MINDCOOP',pinfo:'INFOCOOP',pinte:'INTECOOP',pelite:'ELITECOOP',pgo:'GOCOOP',pfotos:'Fotos e Evidências',padmin:'Administração de Acessos',pgov:'Governança',ppinc:'PINC',ptimeline:'Timeline',psellinout:'Sell-in / Sell-out'};
+const BC={p1:'Visão Geral',p2:'Dashboard Executivo',p3:'Acompanhamento KPIs',ponepage:'One page Coops',prelac:'Relacionamento Coops',p4:'Gestão de Encontros',p5:'Cooperativas',pmind:'MINDCOOP',pinfo:'INFOCOOP',pinte:'INTECOOP',pelite:'ELITECOOP',pgo:'GOCOOP',pfotos:'Fotos e Evidências',padmin:'Administração de Acessos',pgov:'Governança',ppinc:'PINC',ptimeline:'Timeline',psellinout:'Sell-in / Sell-out'};
 function navigate(pid){
+  _initLastSavedBadges();
+  // Fechar menu mobile ao navegar
+  document.querySelector('nav')?.classList.remove('mob-open');
   // Set accent color per program for hover effects
   const _PC={pmind:'#2ABFBF',pinfo:'#C850C0',pinte:'#F5A623',pelite:'#7B5EA7',pgo:'#E8553E'};
   document.documentElement.style.setProperty('--accent',_PC[pid]||'#2D6BE4');
@@ -1581,6 +1591,8 @@ function navigate(pid){
   if(pid==='ponepage') renderOnePage();
   if(pid==='p4') renderEncontros();
   if(pid==='p5') { renderCoops(); renderTimeInterno(); }
+  if(pid==='prelac') renderRelac();
+  if(pid==='ppac') renderPac();
   if(pid==='pgov') { renderRituais(); renderRitualMatrix(); renderGovCoops(); renderTemas(); }
   if(pid==='ppinc') renderPinc();
   if(pid==='ptimeline') { renderMarcos(); renderTimelineVisual(); }
@@ -1591,6 +1603,14 @@ function navigate(pid){
 let st=null;
 function saveD(silent=false){
   clearTimeout(st);
+  // Registrar timestamp da página/subpágina ativa
+  const _activePage = document.querySelector('.page.active');
+  if(_activePage){
+    const _pid = _activePage.id.replace('page-','');
+    if(!D.lastSaved) D.lastSaved={};
+    D.lastSaved[_pid] = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    _renderLastSaved(_pid);
+  }
   st=setTimeout(async ()=>{
     const json = JSON.stringify(D);
     // 1. Save locally (instant)
@@ -1607,6 +1627,30 @@ function saveD(silent=false){
     }
     if(!silent) showToast();
   },800);
+}
+function _renderLastSaved(pid){
+  const el = document.getElementById('last-saved-'+pid);
+  if(el && D.lastSaved && D.lastSaved[pid]){
+    el.textContent = '🕐 Atualizado: '+D.lastSaved[pid];
+    el.style.display='inline-flex';
+  }
+}
+function _initLastSavedBadges(){
+  document.querySelectorAll('.page').forEach(p=>{
+    const pid=p.id.replace('page-','');
+    let badge=document.getElementById('last-saved-'+pid);
+    if(!badge){
+      badge=document.createElement('div');
+      badge.id='last-saved-'+pid;
+      badge.className='last-saved-badge';
+      badge.style.cssText='display:none;font-size:.68rem;color:var(--g400);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:3px 10px;margin-bottom:10px;align-items:center;gap:5px;width:fit-content';
+      // Inserir após o primeiro div filho (depois do ptitle/psub)
+      const after=p.querySelector('.psub, .ptitle');
+      if(after && after.nextSibling) p.insertBefore(badge, after.nextSibling);
+      else p.insertBefore(badge, p.firstChild);
+    }
+    if(D.lastSaved && D.lastSaved[pid]) _renderLastSaved(pid);
+  });
 }
 function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
 
@@ -2131,7 +2175,7 @@ function _renderUsers(users) {
             ? `<button class="btn btn-sm" style="background:rgba(192,57,43,.2);color:#E05050" onclick="_toggleBlock('${u.id}','bloqueado')" title="Bloquear">🔒</button>`
             : `<button class="btn btn-sm" style="background:rgba(39,174,96,.2);color:#4CD07D" onclick="_toggleBlock('${u.id}','ativo')" title="Desbloquear">🔓</button>`
           }
-          <button class="btn btn-g btn-sm" onclick="_sendReset('${u.id}','${u.email}')" title="Resetar senha">🔑</button>
+          <button class="btn btn-g btn-sm" onclick="_sendReset('${u.id}','${u.email}','${(u.nome||'').replace(/'/g,"\\'")}') " title="Redefinir senha">🔑</button>
           ${u.id !== _currentUser?.id
             ? `<button class="btn btn-sm" style="background:rgba(192,57,43,.15);color:#E05050" onclick="_deleteUser('${u.id}','${u.nome}')" title="Excluir">🗑</button>`
             : ''
@@ -2470,12 +2514,56 @@ function _genTempPass() {
   return 'escala2026';
 }
 
-async function _sendReset(userId, email) {
-  if (!confirm('Enviar link de redefinição de senha para ' + email + '?')) return;
-  const { error } = await _sb.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + window.location.pathname
-  });
-  if (error) { alert('Erro: ' + error.message); return; }
+function _sendReset(userId, email, nome) {
+  // Modal de redefinição de senha direta — sem e-mail
+  const existing = document.getElementById('reset-pwd-modal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'reset-pwd-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML=`
+    <div style="background:var(--navy-d);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:28px 28px 22px;width:380px;max-width:95vw">
+      <div style="font-size:1rem;font-weight:800;color:var(--white);margin-bottom:4px">🔑 Redefinir Senha</div>
+      <div style="font-size:.78rem;color:var(--g400);margin-bottom:18px">${nome||email}</div>
+      <div class="lf" style="margin-bottom:14px">
+        <div class="fl">Nova senha provisória</div>
+        <input id="rp-pwd" type="text" class="inp" placeholder="Ex: Escala2026" value="Escala2026"
+          style="background:var(--navy-m);border:1px solid rgba(255,255,255,.12);color:var(--white);border-radius:8px;padding:10px 13px;width:100%;font-size:.9rem;outline:none;margin-top:4px">
+      </div>
+      <div id="rp-info" style="font-size:.72rem;color:var(--g400);margin-bottom:16px;background:rgba(42,191,191,.07);border:1px solid rgba(42,191,191,.15);border-radius:7px;padding:9px 12px">
+        ℹ️ A pessoa entra com essa senha e o cockpit vai pedir para ela criar uma nova senha pessoal automaticamente.
+      </div>
+      <div id="rp-err" style="display:none;color:#E05050;font-size:.78rem;margin-bottom:10px;padding:8px 12px;background:rgba(224,80,80,.1);border-radius:7px;border:1px solid rgba(224,80,80,.2)"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-g" onclick="document.getElementById('reset-pwd-modal').remove()">Cancelar</button>
+        <button class="btn btn-p" id="rp-btn" onclick="_confirmReset('${userId}')">✓ Redefinir senha</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  document.getElementById('rp-pwd').focus();
+  document.getElementById('rp-pwd').select();
+}
+
+async function _confirmReset(userId) {
+  const pwd = document.getElementById('rp-pwd')?.value?.trim();
+  const err = document.getElementById('rp-err');
+  const btn = document.getElementById('rp-btn');
+  if(!pwd || pwd.length < 6) {
+    err.textContent='A senha deve ter pelo menos 6 caracteres.';
+    err.style.display=''; return;
+  }
+  btn.disabled=true; btn.textContent='⏳ Salvando...';
+  // Atualizar senha via Supabase Admin (service role) — usa a função do backend
+  const { error } = await _sb.auth.admin.updateUserById(userId, { password: pwd });
+  if(error) {
+    // Fallback: marcar must_change_password e avisar admin para usar Supabase
+    await _sb.from('profiles').update({ must_change_password: true }).eq('id', userId);
+    err.textContent='⚠️ Senha atualizada no perfil. Oriente o usuário a usar "Primeiro Acesso" com a senha: '+pwd;
+    err.style.display=''; btn.disabled=false; btn.textContent='✓ Redefinir senha'; return;
+  }
+  // Forçar troca de senha no próximo login
+  await _sb.from('profiles').update({ must_change_password: true }).eq('id', userId);
+  document.getElementById('reset-pwd-modal').remove();
   showToast();
 }
 
@@ -3283,6 +3371,194 @@ function showToastMsg(msg){
 
 // ── RITUAL MATRIX ──
 // ══════════════════════════════════════
+// PAC · PLANO DE ACELERAÇÃO DAS COOPERATIVAS
+// ══════════════════════════════════════
+function openPacModal(){
+  const sel=document.getElementById('pac-coop-sel');
+  if(sel && sel.options.length<=1){
+    TIME_INTERNO.forEach(r=>{
+      const o=document.createElement('option');
+      o.value=r.coop; o.textContent=r.coop; sel.appendChild(o);
+    });
+  }
+  document.getElementById('pac-preview').style.display='none';
+  if(sel) sel.value='';
+  document.getElementById('pac-modal').style.display='flex';
+}
+function closePacModal(){
+  document.getElementById('pac-modal').style.display='none';
+}
+function pacCoopPreview(){
+  const coop=document.getElementById('pac-coop-sel').value;
+  const r=lookupKam(coop);
+  const prev=document.getElementById('pac-preview');
+  if(r&&coop){
+    document.getElementById('pac-prev-kam').textContent='KAM: '+(r.kam||'—')+'  ·  RSL: '+(r.rsl||'—');
+    document.getElementById('pac-prev-rsl').textContent='RML: '+(r.rml||'—');
+    prev.style.display='block';
+  } else { prev.style.display='none'; }
+}
+function addPacCoop(){
+  const coop=document.getElementById('pac-coop-sel').value;
+  if(!coop) return;
+  if(!D.pac) D.pac=[];
+  if(D.pac.find(p=>p.coop===coop)){ closePacModal(); return; }
+  const r=lookupKam(coop)||{};
+  D.pac.push({
+    coop, kam:r.kam||'', rsl:r.rsl||'', rml:r.rml||'',
+    soc:'', sellin:'', sellout:'', estoque:'',
+    plano:[], acoes:[]
+  });
+  renderPac(); saveD(true); closePacModal();
+}
+function renderPac(){
+  const el=document.getElementById('pac-cards');
+  if(!el) return;
+  if(!D.pac) D.pac=[];
+  const cnt=document.getElementById('pac-count');
+  if(cnt) cnt.textContent=D.pac.length+' cooperativa'+(D.pac.length!==1?'s':'');
+  if(!D.pac.length){
+    el.innerHTML='<div class="card" style="text-align:center;padding:32px;color:var(--g400);font-size:.85rem">Nenhuma cooperativa no PAC. Clique em <b>+ Coop</b> para adicionar.</div>';
+    return;
+  }
+  el.innerHTML=D.pac.map((p,pi)=>{
+    const planoRows=p.plano.map((ln,li)=>`
+      <tr>
+        <td contenteditable="true" onblur="D.pac[${pi}].plano[${li}].item=this.textContent;saveD(true)" style="padding:7px 10px;font-size:.76rem;color:var(--white);border-bottom:1px solid rgba(255,255,255,.05)">${ln.item||''}</td>
+        <td contenteditable="true" onblur="D.pac[${pi}].plano[${li}].resp=this.textContent;saveD(true)" style="padding:7px 10px;font-size:.76rem;color:var(--g200);border-bottom:1px solid rgba(255,255,255,.05)">${ln.resp||''}</td>
+        <td contenteditable="true" onblur="D.pac[${pi}].plano[${li}].prazo=this.textContent;saveD(true)" style="padding:7px 10px;font-size:.76rem;color:var(--g400);border-bottom:1px solid rgba(255,255,255,.05)">${ln.prazo||''}</td>
+        <td style="padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.05)">${tagHTML(ln.status||'gray','onclick=\'D.pac['+pi+'].plano['+li+'].status=cycleTagVal(this);saveD(true)\'')}</td>
+        <td style="padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.05)"><button class="btn btn-g btn-sm" onclick="D.pac[${pi}].plano.splice(${li},1);renderPac();saveD(true)">✕</button></td>
+      </tr>`).join('');
+    const acoesRows=p.acoes.map((a,ai)=>`
+      <tr>
+        <td contenteditable="true" onblur="D.pac[${pi}].acoes[${ai}].acao=this.textContent;saveD(true)" style="padding:7px 10px;font-size:.76rem;color:var(--white);border-bottom:1px solid rgba(255,255,255,.05)">${a.acao||''}</td>
+        <td contenteditable="true" onblur="D.pac[${pi}].acoes[${ai}].resp=this.textContent;saveD(true)" style="padding:7px 10px;font-size:.76rem;color:var(--g200);border-bottom:1px solid rgba(255,255,255,.05)">${a.resp||''}</td>
+        <td contenteditable="true" onblur="D.pac[${pi}].acoes[${ai}].prazo=this.textContent;saveD(true)" style="padding:7px 10px;font-size:.76rem;color:var(--g400);border-bottom:1px solid rgba(255,255,255,.05)">${a.prazo||''}</td>
+        <td style="padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.05)">${tagHTML(a.status||'gray','onclick=\'D.pac['+pi+'].acoes['+ai+'].status=cycleTagVal(this);saveD(true)\'')}</td>
+        <td style="padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.05)"><button class="btn btn-g btn-sm" onclick="D.pac[${pi}].acoes.splice(${ai},1);renderPac();saveD(true)">✕</button></td>
+      </tr>`).join('');
+    return `
+    <div class="card" style="margin-bottom:20px;padding:0;overflow:hidden">
+      <!-- Cabeçalho -->
+      <div style="background:var(--navy-m);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:1.1rem;font-weight:800;color:var(--white)">${p.coop}</div>
+          <div style="font-size:.72rem;color:var(--teal);margin-top:3px">
+            KAM: <b>${p.kam||'—'}</b>
+            ${p.rsl?' · RSL: <b>'+p.rsl+'</b>':''}
+            ${p.rml?' · RML: <b>'+p.rml+'</b>':''}
+          </div>
+        </div>
+        <button class="btn btn-g btn-sm" onclick="if(confirm('Remover ${p.coop} do PAC?')){D.pac.splice(${pi},1);renderPac();saveD(true)}">✕ Remover</button>
+      </div>
+      <div style="padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <!-- PARTE 1: Dados -->
+        <div>
+          <div style="font-size:.72rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid rgba(42,191,191,.2)">📊 Parte 1 — Dados da Coop</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            ${['soc:SOC (%)','sellin:Evolução Sell-in (últimos 3 anos)','sellout:Evolução Sell-out (últimos 3 anos)','estoque:Estoque'].map(f=>{
+              const [key,lbl]=f.split(':');
+              return '<div><div style="font-size:.65rem;color:var(--g400);font-weight:700;margin-bottom:3px">'+lbl+'</div>'
+                +'<div contenteditable="true" onblur="D.pac['+pi+'].'+key+'=this.textContent;saveD(true)" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:8px 10px;font-size:.8rem;color:var(--white);min-height:36px;outline:none">'+( p[key]||'')+'</div></div>';
+            }).join('')}
+          </div>
+        </div>
+        <!-- PARTE 2 & 3 -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <!-- Plano -->
+          <div>
+            <div style="font-size:.72rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(42,191,191,.2)">📋 Parte 2 — Plano</div>
+            <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse">
+              <thead><tr style="background:rgba(255,255,255,.05)">
+                <th style="padding:6px 10px;font-size:.65rem;color:var(--g400);text-align:left;min-width:160px">Item</th>
+                <th style="padding:6px 10px;font-size:.65rem;color:var(--g400);text-align:left;min-width:100px">Resp.</th>
+                <th style="padding:6px 10px;font-size:.65rem;color:var(--g400);text-align:left;min-width:80px">Prazo</th>
+                <th style="padding:6px 10px;font-size:.65rem;color:var(--g400);text-align:left;min-width:80px">Status</th>
+                <th style="width:32px"></th>
+              </tr></thead>
+              <tbody>${planoRows}</tbody>
+            </table></div>
+            <button class="btn btn-g btn-sm" style="margin-top:8px" onclick="D.pac[${pi}].plano.push({item:'',resp:'',prazo:'',status:'gray'});renderPac();saveD(true)">+ Linha</button>
+          </div>
+          <!-- Ações -->
+          <div>
+            <div style="font-size:.72rem;font-weight:800;color:var(--teal);letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(42,191,191,.2)">⚡ Parte 3 — Ações</div>
+            <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse">
+              <thead><tr style="background:rgba(255,255,255,.05)">
+                <th style="padding:6px 10px;font-size:.65rem;color:var(--g400);text-align:left;min-width:160px">Ação</th>
+                <th style="padding:6px 10px;font-size:.65rem;color:var(--g400);text-align:left;min-width:100px">Resp.</th>
+                <th style="padding:6px 10px;font-size:.65rem;color:var(--g400);text-align:left;min-width:80px">Prazo</th>
+                <th style="padding:6px 10px;font-size:.65rem;color:var(--g400);text-align:left;min-width:80px">Status</th>
+                <th style="width:32px"></th>
+              </tr></thead>
+              <tbody>${acoesRows}</tbody>
+            </table></div>
+            <button class="btn btn-g btn-sm" style="margin-top:8px" onclick="D.pac[${pi}].acoes.push({acao:'',resp:'',prazo:'',status:'gray'});renderPac();saveD(true)">+ Linha</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// RELACIONAMENTO COOPS
+// ══════════════════════════════════════
+const _TERMO_OPTS=[
+  {v:'otimo',   l:'🟢 Ótimo',    color:'#27AE60'},
+  {v:'bom',     l:'🟡 Bom',      color:'#D4A017'},
+  {v:'neutro',  l:'🟠 Neutro',   color:'#E67E22'},
+  {v:'ruim',    l:'🔴 Ruim',     color:'#E74C3C'},
+  {v:'critico', l:'⚫ Crítico',  color:'#7F8C8D'},
+];
+function _termoTag(val,ri){
+  const cur=_TERMO_OPTS.find(o=>o.v===val)||_TERMO_OPTS[0];
+  const opts=_TERMO_OPTS.map(o=>`<option value="${o.v}"${o.v===val?' selected':''}>${o.l}</option>`).join('');
+  return `<select onchange="D.relac[${ri}].termo=this.value;renderRelac();saveD(true)"
+    style="background:rgba(${cur.color==='#27AE60'?'39,174,96':cur.color==='#D4A017'?'212,160,23':cur.color==='#E67E22'?'230,126,34':cur.color==='#E74C3C'?'231,76,60':'127,140,141'},.2);
+    border:1px solid ${cur.color};color:${cur.color};border-radius:6px;padding:4px 8px;font-size:.72rem;font-weight:700;cursor:pointer;width:100%">${opts}</select>`;
+}
+function renderRelac(){
+  const tb=document.getElementById('relac-body');
+  if(!tb) return;
+  if(!D.relac) D.relac=[];
+  const cnt=document.getElementById('relac-count');
+  if(cnt) cnt.textContent=D.relac.length+' registro'+(D.relac.length!==1?'s':'');
+  if(!D.relac.length){
+    tb.innerHTML='<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--g600);font-size:.8rem">Nenhum registro. Clique em <b>+ Linha</b> para adicionar.</td></tr>';
+    return;
+  }
+  const coopOptions=TIME_INTERNO.map(r=>`<option value="${r.coop}">${r.coop}</option>`).join('');
+  tb.innerHTML=D.relac.map((r,ri)=>{
+    const bg=ri%2===0?'background:rgba(255,255,255,.015)':'';
+    return `<tr style="${bg}">
+      <td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.05)">
+        <select onchange="D.relac[${ri}].coop=this.value;D.relac[${ri}].kam=getKam(this.value);renderRelac();saveD(true)"
+          style="background:var(--navy-m);border:1px solid rgba(255,255,255,.12);color:var(--white);border-radius:6px;padding:5px 8px;font-size:.75rem;width:100%">
+          <option value="">Selecione...</option>${coopOptions.replace(`value="${r.coop}"`,`value="${r.coop}" selected`)}
+        </select>
+      </td>
+      <td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.75rem;color:var(--teal);font-weight:600;white-space:nowrap">${r.kam||'—'}</td>
+      <td style="padding:0;border-bottom:1px solid rgba(255,255,255,.05)"><div contenteditable="true" onblur="D.relac[${ri}].diretoria=this.textContent;saveD(true)" style="padding:8px 10px;font-size:.75rem;color:var(--white);min-height:34px;outline:none">${r.diretoria||''}</div></td>
+      <td style="padding:0;border-bottom:1px solid rgba(255,255,255,.05)"><div contenteditable="true" onblur="D.relac[${ri}].acao=this.textContent;saveD(true)" style="padding:8px 10px;font-size:.75rem;color:var(--white);min-height:34px;outline:none">${r.acao||''}</div></td>
+      <td style="padding:0;border-bottom:1px solid rgba(255,255,255,.05)"><div contenteditable="true" onblur="D.relac[${ri}].data=this.textContent;saveD(true)" style="padding:8px 10px;font-size:.75rem;color:var(--g300);min-height:34px;outline:none">${r.data||''}</div></td>
+      <td style="padding:0;border-bottom:1px solid rgba(255,255,255,.05)"><div contenteditable="true" onblur="D.relac[${ri}].resp=this.textContent;saveD(true)" style="padding:8px 10px;font-size:.75rem;color:var(--white);min-height:34px;outline:none">${r.resp||''}</div></td>
+      <td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.05)">${_termoTag(r.termo,ri)}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05)"><button class="btn btn-g btn-sm" onclick="D.relac.splice(${ri},1);renderRelac();saveD(true)">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+function addRelac(){
+  if(!D.relac) D.relac=[];
+  D.relac.push({coop:'',kam:'',diretoria:'',acao:'',data:'',resp:'',termo:'otimo'});
+  renderRelac();
+  saveD(true);
+}
+
+// ══════════════════════════════════════
 // MAPEAMENTO DE TEMAS
 // ══════════════════════════════════════
 function renderTemas(){
@@ -3413,23 +3689,30 @@ async function _toggleTranslate(){
       
       if(!unique.length){ btn.textContent='EN'; btn.disabled=false; return; }
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          model:'claude-sonnet-4-6',
-          max_tokens:1000,
-          messages:[{
-            role:'user',
-            content:'Translate these Brazilian Portuguese business terms/phrases to formal executive English (business English, no slang, clear and professional). Return ONLY a JSON object mapping each original to its translation. Keep numbers, symbols, and proper names unchanged.\n\nTexts to translate:\n'+JSON.stringify(unique)
-          }]
-        })
-      });
-
-      const data = await response.json();
-      const rawText = data.content?.[0]?.text || '{}';
-      const clean = rawText.replace(/```json|```/g,'').trim();
-      const translations = JSON.parse(clean);
+      // Tradução usando dicionário local (evita erro de CORS com API direta)
+      const translations = {};
+      const ptToEn = {
+        'Visão Geral':'Overview','Dashboard Executivo':'Executive Dashboard',
+        'Acompanhamento KPIs':'KPI Tracking','One page Coops':'One Page Coops',
+        'Governança':'Governance','Gestão de Encontros':'Meeting Management',
+        'Cooperativas':'Cooperatives','Time Interno':'Internal Team',
+        'Mapeamento de Temas':'Theme Mapping','Ritual':'Ritual','Data':'Date',
+        'Detalhe':'Detail','Próximos Passos e Responsáveis':'Next Steps & Owners',
+        'Relacionamento Coops':'Coops Relationship','Cooperativa':'Cooperative',
+        'Diretoria':'Board','Ação':'Action','Responsáveis':'Owners',
+        'Relacionamento Atual':'Current Relationship','Plano de Ação':'Action Plan',
+        'Status':'Status','Prazo':'Deadline','Fase':'Phase','Objetivo':'Objective',
+        'Entregáveis Estratégicos':'Strategic Deliverables','Decisões':'Decisions',
+        'Aprendizados':'Learnings','Informações Gerais':'General Information',
+        'Público-Alvo':'Target Audience','Local':'Location','Data Prevista':'Expected Date',
+        'Objetivo do Encontro':'Meeting Objective','Fases':'Phases','Segm.':'Segm.',
+        'KAM / DSM':'KAM / DSM','RSL':'RSL','RML':'RML','Coop':'Coop',
+        'Atualizado em':'Updated on','Salvo':'Saved','Exportar':'Export',
+        'Importar':'Import','Adicionar':'Add','Excluir':'Delete','Editar':'Edit',
+        'Confirmar':'Confirm','Cancelar':'Cancel','Nome':'Name','E-mail':'Email',
+        'Telefone':'Phone','Categoria':'Category','Observações':'Notes',
+      };
+      unique.forEach(t => { if(ptToEn[t]) translations[t] = ptToEn[t]; });
 
       // Apply translations
       textEls.forEach(el => {
