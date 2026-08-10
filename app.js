@@ -1569,9 +1569,9 @@ function renderFotos(){
 // ═══════════ NAVIGATION ═══════════
 const BC={p1:'Visão Geral',p2:'Dashboard Executivo',p3:'Acompanhamento KPIs',ponepage:'One page Coops',prelac:'Relacionamento Coops',p4:'Gestão de Encontros',p5:'Cooperativas',pmind:'MINDCOOP',pinfo:'INFOCOOP',pinte:'INTECOOP',pelite:'ELITECOOP',pgo:'GOCOOP',pfotos:'Fotos e Evidências',padmin:'Administração de Acessos',pgov:'Governança',ppinc:'PINC',ptimeline:'Timeline',psellinout:'Sell-in / Sell-out'};
 function navigate(pid){
-  _initLastSavedBadges();
+  try{_initLastSavedBadges();}catch(e){}
   // Fechar menu mobile ao navegar
-  document.querySelector('nav')?.classList.remove('mob-open');
+  try{document.querySelector('nav')?.classList.remove('mob-open');}catch(e){}
   // Set accent color per program for hover effects
   const _PC={pmind:'#2ABFBF',pinfo:'#C850C0',pinte:'#F5A623',pelite:'#7B5EA7',pgo:'#E8553E'};
   document.documentElement.style.setProperty('--accent',_PC[pid]||'#2D6BE4');
@@ -2347,6 +2347,10 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDiag202
 document.addEventListener('DOMContentLoaded',function(){
   const m=document.getElementById('diag2020-modal');
   if(m) m.addEventListener('click',function(e){if(e.target===this)closeDiag2020();});
+  // Fallback: bind nav items no DOMContentLoaded também
+  document.querySelectorAll('.ni').forEach(n => {
+    n.addEventListener('click', function(){ if(typeof navigate==='function') navigate(this.dataset.page); });
+  });
 });
 
 
